@@ -1,28 +1,53 @@
 import React, { Component } from "react";
 import { Container, Row, Col, Table } from "react-bootstrap";
 import { Link } from "react-router-dom";
-export default class Media extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      students: [],
-    };
-  }
+import { connect } from "react-redux";
+// import listStudents from "../../actions";
 
-  componentDidMount = () => {
+const mapStateToProps = (state) => state;
+
+const mapDispatchToProps = (dispatch) => ({
+  fetchStudents: () => dispatch(fetchStudentsApi()),
+});
+
+const fetchStudentsApi = () => {
+  return (dispatch, getState) => {
     fetch("http://localhost:3001/students")
       .then((response) => response.json())
-      .then((responseObject) => {
-        console.log("DATA", responseObject.data);
-        this.setState({ students: responseObject.data });
-      })
-      .catch((err) => {
-        this.setState({ error: true });
-        console.log("An error has occurred:", err);
+      .then((data) => data.data)
+      .then((data) => {
+        console.log("DATA", getState());
+        dispatch({ type: "FETCH_STUDENTS", payload: data });
       });
   };
+};
+
+class Students extends Component {
+  componentDidMount = () => {
+    this.props.fetchStudents();
+  };
+
+  // constructor(props) {
+  //   super(props);
+  //   this.state = {
+  //     students: [],
+  //   };
+  // }
+
+  // componentDidMount = () => {
+  //   fetch("http://localhost:3001/students")
+  //     .then((response) => response.json())
+  //     .then((responseObject) => {
+  //       console.log("DATA", responseObject.data);
+  //       this.setState({ students: responseObject.data });
+  //     })
+  //     .catch((err) => {
+  //       this.setState({ error: true });
+  //       console.log("An error has occurred:", err);
+  //     });
+  // };
   render() {
-    console.log(this.state.students);
+    // console.log(this.state.students);
     return (
       <Container>
         <Row>
@@ -36,7 +61,7 @@ export default class Media extends Component {
                   <th>Username</th>
                 </tr>
               </thead>
-              {this.state.students.map((student) => (
+              {this.props.listStudents.students.map((student) => (
                 <tbody>
                   <tr>
                     <td>
@@ -55,3 +80,5 @@ export default class Media extends Component {
     );
   }
 }
+
+export default connect(mapStateToProps, mapDispatchToProps)(Students);
